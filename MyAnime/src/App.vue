@@ -1,7 +1,6 @@
 <template>
   <div id="app">
 <!--    <img src="./assets/logo.png">-->
-    <h1>Hello!</h1>
 <!--    <p>-->
 <!--      &lt;!&ndash; 使用 router-link 组件来导航. &ndash;&gt;-->
 <!--      &lt;!&ndash; 通过传入 `to` 属性指定链接. &ndash;&gt;-->
@@ -25,8 +24,7 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>
