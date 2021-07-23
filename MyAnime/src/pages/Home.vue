@@ -8,7 +8,7 @@
       <p id="p3" @click="twinkle">这是闪烁</p>
 
       <p id="p4" @click="slipIn">这是滑入</p>
-      <p id="p5">这是滑出</p>
+      <p id="p5" @click="slipOut">这是滑出</p>
     </div>
 
   </div>
@@ -64,6 +64,10 @@ export default {
     },
     slipIn(){
       this.animeList[event.target.id].setEnterType("slipIn");
+      this.animeList[event.target.id].print();
+    },
+    slipOut(){
+      this.animeList[event.target.id].setExitType("slipOut");
       this.animeList[event.target.id].print();
     }
   },

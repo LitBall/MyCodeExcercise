@@ -2,10 +2,11 @@
 // 1. 可以配置动画类型
 // (已实现手动传参，后续在前端添加交互选择）
 // 2. 可以配置动画时间
+//速度、起止时间……
 // 3. 可以配置动画开始和结束的回调函数
 
 //默认配置
-const defaultInstanceSettings = {
+const DefaultInstanceSettings = {
   begin: null,//开始时间
   end: null,//结束时间
   last: null,//持续时间
@@ -17,7 +18,7 @@ const defaultInstanceSettings = {
   beginCallBack: null,//动画开始的回调函数
   endCallBack: null,
 }
-const defaultTweenSettings = {
+const DefaultTweenSettings = {
   duration: 1000,
   delay: 0,
   endDelay: 0,
@@ -26,7 +27,7 @@ const defaultTweenSettings = {
 export default class MyElement{
   constructor(id) {
     this.id = id;
-    this.settings = defaultInstanceSettings;
+    this.settings = DefaultInstanceSettings;
   }
   print(){
     console.log(this);
@@ -37,45 +38,51 @@ export default class MyElement{
   //2.保存原style
   //3.调用动画函数，动画函数之内修改css
 
+  //问题：根据浏览器窗口尺寸计算的一些动画，在改变窗口尺寸（拉伸...）后，怎么处理？
+
   //设置进入动画类型
   setEnterType(type){
     this.settings.enterType = type;
     let that = this;
     let enterAnime = {
-      //滑入：改变元素绝对定位的left right top bottom等属性，修改位置
+      //滑入：改变元素relative定位的left right top bottom等属性，修改位置
       /*
-      * @param: speed: 元素运动速度，默认20
+      * @param: speed: 元素运动速度，默认15
       * @param: direction: 方向，默认左边
       * */
-      slipIn: function (speed= 20){
-        console.log("slipIn on");
+      slipIn: function (speed=15,direction="left"){
+        console.log("slip in");
         let e = document.getElementById(that.id);
-        //let originalStyle = e.style.cssText;
-        //e.style.position = "relative"; //使其相对定位
-        //let startTime = (new Date()).getTime();//动画开始时间
-        let initLeft = e.offsetLeft;
-        console.log(initLeft);
-        clearInterval(e.timeID);
-        e.timeID = setInterval(() => {
-          //从左边进入
-          e.style.left = '0px';
-          let currLeft = e.offsetLeft;
-          //边界检测
-          let isLeft = currLeft <= initLeft? true:false;
-          isLeft?currLeft += speed : currLeft -= speed;
-          e.style.left = currLeft.toString() + 'px';
-
-          if(isLeft?currLeft >= initLeft:currLeft <= initLeft) {
-            //(1)停止定时器
+        e.style.position = "relative"; //使其相对定位
+        let slip = {
+          left: function (){
+            let initLeft = e.offsetLeft;
+            let initWidth = e.offsetWidth;
+            let offset = initLeft + initWidth;
+            console.log(initLeft, ' / ', initWidth);
             clearInterval(e.timeID);
-            //(2)元素复位
-            e.style.left = initLeft + 'px';
+            //从左边进入
+            e.style.right = offset + 'px';
+            e.timeID = setInterval(() => {
+              //获取当前位置。因为css值是带单位的string，所以需要处理
+              let currLeft = Number(e.style.right.slice(0,-2));
+              //console.log(typeof currLeft);
+              //开始移动，判断位置
+              let isLeft = currLeft >= 0? true:false;
+              isLeft? currLeft -= speed : currLeft += speed;
+              e.style.right = currLeft.toString() + 'px';
+              //边界检测
+              if(isLeft?currLeft <= 0:currLeft >= 0) {
+                //停止定时器
+                clearInterval(e.timeID);
+                //元素复位
+                e.style.right = '0px';
+              }
+            },10)
           }
-        },10)
-        // animeOn();
-        // function animeOn(){
-        //
-        // }
+        }
+        slip[direction]();
+
       }
     };
     enterAnime[type]();
@@ -84,7 +91,46 @@ export default class MyElement{
   setExitType(type){
     this.settings.exitType = type;
     let that = this;
-    let exitAnime = {};
+    let exitAnime = {
+      //滑出：和滑入类似
+      /*
+      * @param: speed: 元素运动速度，默认15
+      * @param: direction: 方向，默认左边
+      * */
+      slipOut: function (speed=15,direction="right"){
+        console.log("slip out");
+        let e = document.getElementById(that.id);
+        e.style.position = "relative"; //使其相对定位
+        let slip = {
+          right: function (){
+            let browserWidth = window.innerWidth;//浏览器窗口宽度
+            console.log(window.innerWidth);
+            let initLeft = e.offsetLeft;
+            let target = browserWidth - initLeft;
+            console.log(initLeft, ' / ', target);
+            clearInterval(e.timeID);
+            //从右边退出
+            e.style.left = '0px';
+            e.timeID = setInterval(() => {
+              //获取当前位置。因为css值是带单位的string，所以需要处理
+              let currLeft = Number(e.style.left.slice(0,-2));
+              //开始移动，判断位置
+              let isLeft = currLeft <= target ? true:false;
+              isLeft? currLeft += speed : currLeft -= speed;
+              e.style.left = currLeft.toString() + 'px';
+              //边界检测
+              if(isLeft? currLeft >= target : currLeft <= target) {
+                //停止定时器
+                clearInterval(e.timeID);
+                //元素复位
+                e.style.left = target + 'px';
+              }
+            },10)
+          }
+        }
+        slip[direction]();
+      }
+    };
     exitAnime[type]();
   }
   //设置强调动画类型
@@ -106,8 +152,12 @@ export default class MyElement{
         let originalStyle = e.style.cssText;
         e.style.position = "relative"; //使其相对定位
         let startTime = (new Date()).getTime();//动画开始时间
-        animeOn();
+        async function asyncAnime(){
+          let r1 = await CallBack["startCall"]();
+          let r2 = await animeOn();
+        }
         function animeOn(){
+          console.log("aa")
           let nowTime = (new Date()).getTime();
           let pastTime = nowTime - startTime;
           let fraction = pastTime / time;
@@ -120,6 +170,12 @@ export default class MyElement{
             // if(onComplete) onComplete(e);//动画结束，回调函数
           }
         }
+        // //可扩展回调函数
+        // asyncAnime().then(() => {
+        //   CallBack["endCall"]();//动画结束的回调函数
+        // });
+        // asyncAnime().catch({});
+        animeOn();
       },
       //闪烁
       twinkle: function (time=500){
@@ -165,28 +221,28 @@ export default class MyElement{
     viewAnime[type]();
   }
 
-
-
-
 }
 
-//进入动画
-
-//浮现
-function emerge(){
-
+//回调函数，可扩展
+let CallBack = {
+  startCall: async function(){
+    console.log("start call");
+    const a = await new Promise(resolve => {
+      setTimeout(() => {
+        resolve("done");
+        console.log("async start after 500ms!");
+      },500)
+    })
+  },
+  endCall: async function(){
+    console.log("end call");
+    const a = await new Promise(resolve => {
+      setTimeout(() => {
+        resolve("done");
+        console.log("async end after 500ms!");
+      },500)
+    })
+  },
 }
-
-
-//退出动画
-//滑出
-function slipOut(){
-
-}
-//淡出
-function fadeOut(){
-
-}
-
 
 
