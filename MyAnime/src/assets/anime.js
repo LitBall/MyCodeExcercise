@@ -45,9 +45,9 @@ export default class MyElement{
     this.settings.enterType = type;
     let that = this;
     let enterAnime = {
-      //滑入：改变元素relative定位的left right top bottom等属性，修改位置
+      //飞入：改变元素relative定位的left right top bottom等属性，修改位置
       /*
-      * @param: speed: 元素运动速度，默认15
+      * @param:
       * @param: direction: 方向，默认左边
       * */
       slipIn: function (speed=15,direction="left"){
@@ -78,7 +78,44 @@ export default class MyElement{
                 //元素复位
                 e.style.right = '0px';
               }
-            },10)
+            },20)
+          }
+        }
+        slip[direction]();
+      },
+      easeIn: function (direction="left"){
+        console.log("ease in");
+        let e = document.getElementById(that.id);
+        e.style.position = "relative"; //使其相对定位
+        let slip = {
+          left: function (){
+            let initLeft = e.offsetLeft;
+            let initWidth = e.offsetWidth;
+            let offset = initLeft + initWidth;
+            console.log(initLeft, ' / ', initWidth);
+            clearInterval(e.timeID);
+            //从左边进入
+            e.style.right = offset + 'px';
+            e.timeID = setInterval(() => {
+              //获取当前位置。因为css值是带单位的string，所以需要处理
+              let currLeft = Number(e.style.right.slice(0,-2));
+              //console.log(typeof currLeft);
+              //开始移动，判断位置
+              let isLeft = currLeft >= 0? true:false;
+              // 步长 公式:(目标位置-现在的位置)/10
+              // Math.ceil 是往大的取整. Math.floor s是往小的取整;
+              let step = currLeft / 10;
+              step = step > 0 ? Math.ceil(step): Math.floor(step);
+              isLeft? currLeft -= step : currLeft += step;
+              e.style.right = currLeft.toString() + 'px';
+              //边界检测
+              if(isLeft?currLeft <= 0:currLeft >= 0) {
+                //停止定时器
+                clearInterval(e.timeID);
+                //元素复位
+                e.style.right = '0px';
+              }
+            },20)
           }
         }
         slip[direction]();
@@ -123,13 +160,47 @@ export default class MyElement{
                 //停止定时器
                 clearInterval(e.timeID);
                 //元素复位
-                e.style.left = target + 'px';
+                setTimeout(()=>{
+                  e.style.left = '0px';
+                },1500)
+
               }
             },10)
           }
         }
         slip[direction]();
-      }
+      },
+      fadeOut: function (){
+        console.log("fadeOut on");
+        let e = document.getElementById(that.id);
+        clearInterval(e.timeID);
+        e.timeID = setInterval(() => {
+          e.style.opacity *= 0.9;
+          if(e.style.opacity < 0.02){
+            //停止定时器
+            clearInterval(e.timeID);
+            //元素复位
+            setTimeout(()=>{
+              e.style.opacity = 1;
+            },1500)
+          }
+        },1000/60)
+        //let startTime = (new Date()).getTime();//动画开始时间
+        // //animeOn();
+        // function animeOn(){
+        //   let nowTime = (new Date()).getTime();
+        //   let pastTime = nowTime - startTime;
+        //   let fraction = pastTime / time;
+        //   if(fraction < 1){
+        //     let alpha = Math.sin(fraction*4*Math.PI);
+        //     e.style.opacity = alpha;
+        //     setTimeout(animeOn, Math.min(25, time - pastTime));
+        //   } else {
+        //     e.style.cssText = originalStyle;//恢复原状
+        //     // if(onComplete) onComplete(e);//动画结束，回调函数
+        //   }
+        // }
+      },
     };
     exitAnime[type]();
   }
@@ -157,7 +228,7 @@ export default class MyElement{
           let r2 = await animeOn();
         }
         function animeOn(){
-          console.log("aa")
+          //console.log("aa")
           let nowTime = (new Date()).getTime();
           let pastTime = nowTime - startTime;
           let fraction = pastTime / time;
