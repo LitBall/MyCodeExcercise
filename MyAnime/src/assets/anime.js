@@ -1,9 +1,11 @@
 //实现一个简单的的js库
 // 1. 可以配置动画类型
 // (已实现手动传参，后续在前端添加交互选择）
-// 2. 可以配置动画时间
-//速度、起止时间……
+// 2. 可以配置动画时间。速度、起止时间……
 // 3. 可以配置动画开始和结束的回调函数
+
+//标有“学到”：是一些学到的编程方法！
+
 
 //默认配置
 const DefaultInstanceSettings = {
@@ -41,16 +43,20 @@ export default class MyElement{
   //问题：根据浏览器窗口尺寸计算的一些动画，在改变窗口尺寸（拉伸...）后，怎么处理？
 
   //设置进入动画类型
-  setEnterType(type){
+  /*
+  * @param: type: 动画类型
+  * @param: speed: 速度，定时器周期 default=20
+  * @param: direction: 方向 default="left"
+  * @param: onStart: 动画开始时的回调函数
+  * @param: onComplete: 动画完成后的回调函数
+  * */
+  setEnterType({type, speed = 20, direction = "left", onStart = null, onComplete = null} = {}){
     this.settings.enterType = type;
     let that = this;
     let enterAnime = {
+      //这里具体方法里面回调函数还没写
       //飞入：改变元素relative定位的left right top bottom等属性，修改位置
-      /*
-      * @param:
-      * @param: direction: 方向，默认左边
-      * */
-      slipIn: function (speed=15,direction="left"){
+      slipIn: function (speed, direction, onStart, onComplete){
         console.log("slip in");
         let e = document.getElementById(that.id);
         e.style.position = "relative"; //使其相对定位
@@ -81,9 +87,19 @@ export default class MyElement{
             },20)
           }
         }
-        slip[direction]();
+
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await slip[direction]();
+        }
+        //可扩展回调函数
+        //完成回调函数此处配置
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+        }).catch(() => { console.log("error!")});
       },
-      easeIn: function (direction="left"){
+      easeIn: function (speed, direction, onStart, onComplete){
         console.log("ease in");
         let e = document.getElementById(that.id);
         e.style.position = "relative"; //使其相对定位
@@ -104,7 +120,7 @@ export default class MyElement{
               let isLeft = currLeft >= 0? true:false;
               // 步长 公式:(目标位置-现在的位置)/10
               // Math.ceil 是往大的取整. Math.floor s是往小的取整;
-              let step = currLeft / 10;
+              let step = currLeft / speed;
               step = step > 0 ? Math.ceil(step): Math.floor(step);
               isLeft? currLeft -= step : currLeft += step;
               e.style.right = currLeft.toString() + 'px';
@@ -120,21 +136,35 @@ export default class MyElement{
         }
         slip[direction]();
 
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await slip[direction]();
+        }
+        //可扩展回调函数
+        //完成回调函数此处配置
+        slip[direction]();
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+        }).catch(() => { console.log("error!")});
       }
     };
-    enterAnime[type]();
+    enterAnime[type](speed, direction, onStart, onComplete);
   }
   //设置退出动画类型
-  setExitType(type){
+  /*
+  * @param: type: 动画类型
+  * @param: speed: 速度，定时器周期 default=20
+  * @param: direction: 方向 default="right"
+  * @param: onStart: 动画开始时的回调函数
+  * @param: onComplete: 动画完成后的回调函数
+  * */
+  setExitType({type, speed= 20, direction= "right", onStart = null, onComplete = null} = {}){
     this.settings.exitType = type;
     let that = this;
     let exitAnime = {
       //滑出：和滑入类似
-      /*
-      * @param: speed: 元素运动速度，默认15
-      * @param: direction: 方向，默认左边
-      * */
-      slipOut: function (speed=15,direction="right"){
+      slipOut: function (speed, direction, onStart, onComplete){
         console.log("slip out");
         let e = document.getElementById(that.id);
         e.style.position = "relative"; //使其相对定位
@@ -168,67 +198,90 @@ export default class MyElement{
             },10)
           }
         }
-        slip[direction]();
+
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await slip[direction]();
+        }
+        //可扩展回调函数
+        //完成回调函数此处配置
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+        }).catch(() => { console.log("error!")});
+
       },
-      fadeOut: function (){
+      fadeOut: function (speed, onStart, onComplete){
         console.log("fadeOut on");
         let e = document.getElementById(that.id);
-        clearInterval(e.timeID);
-        e.timeID = setInterval(() => {
-          e.style.opacity *= 0.9;
-          if(e.style.opacity < 0.02){
-            //停止定时器
-            clearInterval(e.timeID);
-            //元素复位
-            setTimeout(()=>{
-              e.style.opacity = 1;
-            },1500)
-          }
-        },1000/60)
-        //let startTime = (new Date()).getTime();//动画开始时间
-        // //animeOn();
-        // function animeOn(){
-        //   let nowTime = (new Date()).getTime();
-        //   let pastTime = nowTime - startTime;
-        //   let fraction = pastTime / time;
-        //   if(fraction < 1){
-        //     let alpha = Math.sin(fraction*4*Math.PI);
-        //     e.style.opacity = alpha;
-        //     setTimeout(animeOn, Math.min(25, time - pastTime));
-        //   } else {
-        //     e.style.cssText = originalStyle;//恢复原状
-        //     // if(onComplete) onComplete(e);//动画结束，回调函数
-        //   }
-        // }
+        console.log(e.style.opacity)
+        function animeOn(){
+          clearInterval(e.timeID);
+          e.timeID = setInterval(() => {
+            //speed
+            e.style.opacity *= speed;
+            if(e.style.opacity < 0.02){
+              e.style.opacity = 0;
+              //停止定时器
+              clearInterval(e.timeID);
+              //元素复位
+              setTimeout(()=>{
+                e.style.opacity = 1;
+                console.log("t1")
+              },1500)
+            }
+          },1000/60)
+        }
+
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await animeOn();
+        }
+        //可扩展回调函数
+        //完成回调函数此处配置
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+          console.log("t2")
+        }).catch(() => { console.log("error!")});
       },
     };
-    exitAnime[type]();
+    switch (type){
+      case "slipOut":
+        exitAnime[type](speed, direction, onStart, onComplete);
+        break;
+      case "fadeOut":
+        if(speed == 20){
+          speed = 0.9;
+        }
+        exitAnime[type](speed, onStart, onComplete);
+        break;
+    }
+
   }
+
+
   //设置强调动画类型
-  setViewType(type){
+  /*
+  * @param: type: 动画类型
+  * @param: time: 时间 default=500ms
+  * @param: onStart: 动画开始时的回调函数
+  * @param: onComplete: 动画完成后的回调函数
+  * */
+  setViewType({type, distance = 5, time = 500, onStart = null, onComplete = null} = {}){
     this.settings.viewType = type;
     let that = this;
     let viewAnime = {
-      /*
-      * e: 元素id
-      * time: 时间，默认500ms
-      * onComplete: 动画完成后的回调函数
-      * */
-
       //震动
-      // distance: 震动距离，默认5px
-      shake: function (distance=5,time=500){
+      shake: function (distance, time = 500, onStart, onComplete){
         console.log("shake on");
         let e = document.getElementById(that.id);
         let originalStyle = e.style.cssText;
+        //let distance = 5;//震动距离
         e.style.position = "relative"; //使其相对定位
         let startTime = (new Date()).getTime();//动画开始时间
-        async function asyncAnime(){
-          let r1 = await CallBack["startCall"]();
-          let r2 = await animeOn();
-        }
+
         function animeOn(){
-          //console.log("aa")
           let nowTime = (new Date()).getTime();
           let pastTime = nowTime - startTime;
           let fraction = pastTime / time;
@@ -238,24 +291,30 @@ export default class MyElement{
             setTimeout(animeOn, Math.min(25, time - pastTime));
           } else {
             e.style.cssText = originalStyle;//恢复原状
-            // if(onComplete) onComplete(e);//动画结束，回调函数
           }
         }
-        // //可扩展回调函数
-        // asyncAnime().then(() => {
-        //   CallBack["endCall"]();//动画结束的回调函数
-        // });
-        // asyncAnime().catch({});
+
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await animeOn();
+        }
+        //学到：promise的使用
+        //可扩展回调函数
+        //完成回调函数此处配置
         animeOn();
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+        }).catch(() => { console.log("error!")});
+
       },
       //闪烁
-      twinkle: function (time=500){
+      twinkle: function (time=500, onStart, onComplete){
         console.log("twinkle on");
         let e = document.getElementById(that.id);
         let originalStyle = e.style.cssText;
         //e.style.position = "relative"; //使其相对定位
         let startTime = (new Date()).getTime();//动画开始时间
-        animeOn();
         function animeOn(){
           let nowTime = (new Date()).getTime();
           let pastTime = nowTime - startTime;
@@ -269,6 +328,17 @@ export default class MyElement{
             // if(onComplete) onComplete(e);//动画结束，回调函数
           }
         }
+        animeOn();
+        //开始回调函数此处配置
+        async function asyncAnime(){
+          let r1 = await CallBack[onStart]();//动画开始时的回调函数名称
+          let r2 = await animeOn();
+        }
+        //可扩展回调函数
+        //完成回调函数此处配置
+        asyncAnime().then(() => {
+          CallBack[onComplete]();
+        }).catch(() => { console.log("error!")});
       },
 
       // //跳动
@@ -289,7 +359,17 @@ export default class MyElement{
       //   }
       // }
     };
-    viewAnime[type]();
+
+    switch (type){
+      case "shake":
+        viewAnime[type](distance, time, onStart, onComplete);
+        break;
+      case "twinkle":
+        viewAnime[type](time, onStart, onComplete);//闪烁的使用方法
+        break;
+    }
+
+    //viewAnime[type](time, onStart, onComplete);震动的使用方法
   }
 
 }
@@ -300,7 +380,7 @@ let CallBack = {
     console.log("start call");
     const a = await new Promise(resolve => {
       setTimeout(() => {
-        resolve("done");
+        resolve("done1");
         console.log("async start after 500ms!");
       },500)
     })
@@ -309,7 +389,7 @@ let CallBack = {
     console.log("end call");
     const a = await new Promise(resolve => {
       setTimeout(() => {
-        resolve("done");
+        resolve("done2");
         console.log("async end after 500ms!");
       },500)
     })

@@ -24,8 +24,8 @@
                 <span>强调动画</span>
               </template>
               <el-menu-item-group>
-                <el-menu-item index="1-1" @click="toHere('shake')">我是震动</el-menu-item>
-                <el-menu-item index="1-2" @click="toHere('twinkle')">我是闪烁</el-menu-item>
+                <el-menu-item index="1-1" @click="toHere('shake','highlight')">我是震动</el-menu-item>
+                <el-menu-item index="1-2" @click="toHere('twinkle','highlight')">我是闪烁</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
             <el-submenu index="2">
@@ -33,8 +33,8 @@
                 <span>进入动画</span>
               </template>
               <el-menu-item-group>
-                <el-menu-item index="2-1" @click="toHere('slipIn')">我是飞入</el-menu-item>
-                <el-menu-item index="2-2"  @click="toHere('easeIn')">我是渐入</el-menu-item>
+                <el-menu-item index="2-1" @click="toHere('slipIn','enter')">我是飞入</el-menu-item>
+                <el-menu-item index="2-2"  @click="toHere('easeIn','enter')">我是渐入</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
             <el-submenu index="3">
@@ -42,8 +42,8 @@
                 <span>退出动画</span>
               </template>
               <el-menu-item-group>
-                <el-menu-item index="3-1" @click="toHere('slipOut')">我是滑出</el-menu-item>
-                <el-menu-item index="3-2" @click="toHere('fadeOut')">我是淡出</el-menu-item>
+                <el-menu-item index="3-1" @click="toHere('slipOut','exit')">我是滑出</el-menu-item>
+                <el-menu-item index="3-2" @click="toHere('fadeOut','exit')">我是淡出</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
           </el-menu>
@@ -66,34 +66,97 @@
           <li>
             在anime.js中
             <ol>
-              <li>创建一个类MyElement，包含元素id、动画配置（包含起止时间、动画类型、回调函数等等）等信息（私有成员），设置<strong>默认配置</strong></li>
-              <li>编写各类动画实现的<strong>公共方法</strong></li>
-              <li>编写<strong>全局的默认配置</strong></li>
+              <li>创建一个类MyElement，包含元素id、动画配置（包含起止时间、动画类型、回调函数等等）等信息（私有成员），设置默认配置</li>
+              <li>编写各类动画实现的公共方法</li>
+              <li>编写全局的默认配置</li>
             </ol>
           </li>
 
           <li>在vue实例中，引入anime.js
             <ol>
-              <li>对各个要使用的动画DOM元素获取id，并创建一个新的`MyElement`对象</li>
+              <li>对各个要使用的动画DOM元素获取id，并创建一个新的MyElement对象</li>
               <li>可以手动配置</li>
             </ol>
           </li>
         </ul>
-        <el-button @click="activeIndex='anime'" class="primary">一起来看看吧</el-button>
+        <el-button @click="activeIndex='highlight'" plain style="float:right;">
+          <i class="el-icon-arrow-right el-icon--right"></i>
+        </el-button>
       </div>
-      <div v-show="activeIndex=='anime'">
-        <div><span id="shake" @click="setHighLight('shake')">这是震动</span></div>
+
+<!--      正文-->
+      <div v-show="activeIndex=='highlight'">
+        <div>
+          <span id="shake" @click="setHighLight('shake')">这是震动</span>
+          <span class="example"><strong>示例用法：</strong>
+            <p>//anime: 'shake'</p>
+            <div>
+              <p>shake(){</p>
+              <p>MyElementList[elementID].setViewType({type: anime, distance: 10, onStart: "startCall", onComplete: "endCall"});</p>
+              <p>},</p>
+            </div>
+          </span>
+        </div>
         <el-divider></el-divider>
+
         <div><span id="s2" @click="dance">这是跳动</span></div>
         <el-divider></el-divider>
-        <div><span id="twinkle" @click="setHighLight('twinkle')">这是闪烁</span></div>
+        <div>
+          <span id="twinkle" @click="setHighLight('twinkle')">这是闪烁</span>
+          <span class="example"><strong>示例用法：</strong>
+            <p>//anime: 'twinkle'</p>
+            <div>
+              <p>twinkle(){</p>
+              <p>MyElementList[elementID].setViewType({type: anime, onStart: "startCall", onComplete: "endCall"});</p>
+              <p>},</p>
+            </div>
+          </span>
+        </div>
         <el-divider></el-divider>
-        <div><span id="slipIn" @click="setEnter('slipIn')">这是飞入</span></div>
+
+      </div>
+      <div v-show="activeIndex=='enter'">
+        <div>
+          <span id="slipIn" @click="setEnter('slipIn')">这是飞入</span>
+          <span class="example"><strong>示例用法：</strong>
+            <p>//anime: 'slipIn'</p>
+            <div>
+              slipIn(){
+              <p>MyElementList[elementID].setEnterType({type: 'slipIn', speed: 5,onStart: "startCall", onComplete: "endCall"});</p>
+              <p>},</p>
+            </div>
+          </span>
+        </div>
         <el-divider></el-divider>
-        <div><span id="easeIn" @click="setEnter('easeIn')">这是渐入</span></div>
+
+        <div>
+          <span id="easeIn" @click="setEnter('easeIn')">这是渐入</span>
+          <span class="example"><strong>示例用法：</strong>
+            <p>//anime: 'easeIn'</p>
+            <div>
+              easeIn(){
+              <p>MyElementList[elementID].setEnterType({type: 'slipIn', speed: 5,onStart: "startCall", onComplete: "endCall"});</p>
+              <p>},</p>
+            </div>
+          </span>
+        </div>
         <el-divider></el-divider>
-        <div><span id="slipOut" @click="setExit('slipOut')">这是滑出</span></div>
+
+      </div>
+      <div v-show="activeIndex=='exit'">
+        <div>
+          <span id="slipOut" @click="setExit('slipOut')">这是滑出</span>
+          <span class="example"><strong>示例用法：</strong>
+            <p>//anime: 'easeIn'</p>
+            <div>
+              easeIn(){
+              <p>MyElementList[elementID].setEnterType({type: 'slipIn', speed: 5,onStart: "startCall", onComplete: "endCall"});</p>
+              <p>},</p>
+            </div>
+          </span>
+        </div>
         <el-divider></el-divider>
+
         <div><span id="fadeOut" @click="setExit('fadeOut')">这是淡出</span></div>
         <el-divider></el-divider>
       </div>
@@ -116,9 +179,6 @@ export default {
       msg:"My Anime.js",
       activeIndex: "profile",
       animeList: {},
-      animeTemplate:[
-        ``,
-      ],
     }
   },
   methods:{
@@ -137,7 +197,7 @@ export default {
         this.animeList = objList;
         //console.log("aa",this.animeList);
         for(let i in objList){
-          objList[i].print();//打印信息
+          //objList[i].print();//打印信息
         }
       })
     },
@@ -147,24 +207,46 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
-    toHere(loc){
+    toHere(loc,type){
+      this.activeIndex = type;
       document.getElementById(loc).scrollIntoView();
     },
     //缺省参数event，可以在target中获取id
     setHighLight(anime){
-      this.animeList[event.target.id].setViewType(anime);
-      this.animeList[event.target.id].print();
+      switch (anime){
+        case "shake":
+          //震动的使用方法
+          this.animeList[event.target.id].setViewType({type: anime, distance: 15, onStart: "startCall", onComplete: "endCall"});
+          break;
+        case "twinkle":
+          //闪烁的使用方法
+          this.animeList[event.target.id].setViewType({type: anime, onStart: "startCall", onComplete: "endCall"});
+          break;
+      }
+      //this.animeList[event.target.id].print();
     },
     dance(){
       this.animeList[event.target.id].print();
     },
     setEnter(anime){
-      this.animeList[event.target.id].setEnterType(anime);
-      this.animeList[event.target.id].print();
+      //slipIn: speed越大，速度越快
+      //easeIn: speed越大，速度越慢
+      this.animeList[event.target.id].setEnterType({type: anime, speed: 20, direction: "left", onStart: "startCall", onComplete: "endCall"});
+      //this.animeList[event.target.id].print();
     },
     setExit(anime){
-      this.animeList[event.target.id].setExitType(anime);
-      this.animeList[event.target.id].print();
+      switch (anime){
+        case "slipOut":
+          //slipOut: speed越大，速度越快
+          this.animeList[event.target.id].setExitType({type: anime, speed: 10, direction: "right", onStart: "startCall", onComplete: "endCall"});
+          break;
+        case "fadeOut":
+          //fadeOut: speed越大，速度越慢，透明度递减
+          this.animeList[event.target.id].setExitType({type: anime, speed: 0.95,onStart: "startCall", onComplete: "endCall"});
+          break;
+      }
+
+      //this.animeList[event.target.id].print();
     },
   },
   mounted() {
@@ -186,14 +268,18 @@ export default {
 }
 #animeShow{
   padding-left: 35%;
-  width: 40%;
+  width: 45%;
   overflow: hidden;
 }
-#animeShow div{
+#animeShow:first-child{
   margin-top: 20%;
 }
 #animeShow div span{
   padding: 30px;
   display: inline-block;
+}
+.example{
+  margin-left: 5%;
+  border-top: 1px dotted;
 }
 </style>
